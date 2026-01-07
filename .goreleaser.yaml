@@ -1,0 +1,79 @@
+version: 2
+
+project_name: opencost-cloudcost-exporter
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: opencost-cloudcost-exporter
+    main: .
+    binary: opencost-cloudcost-exporter
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  use: git
+
+release:
+  draft: false
+
+dockers:
+  - image_templates:
+      - "ghcr.io/hawky4s/{{ .ProjectName }}:{{ .Version }}-amd64"
+      - "ghcr.io/hawky4s/{{ .ProjectName }}:latest-amd64"
+    use: buildx
+    dockerfile: Dockerfile.goreleaser
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.source=https://github.com/hawky-4s-/{{ .ProjectName }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+    goarch: amd64
+
+  - image_templates:
+      - "ghcr.io/hawky4s/{{ .ProjectName }}:{{ .Version }}-arm64"
+      - "ghcr.io/hawky4s/{{ .ProjectName }}:latest-arm64"
+    use: buildx
+    dockerfile: Dockerfile.goreleaser
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.source=https://github.com/hawky-4s-/{{ .ProjectName }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+    goarch: arm64
+
+docker_manifests:
+  - name_template: "ghcr.io/hawky4s/{{ .ProjectName }}:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/hawky4s/{{ .ProjectName }}:{{ .Version }}-amd64"
+      - "ghcr.io/hawky4s/{{ .ProjectName }}:{{ .Version }}-arm64"
+  - name_template: "ghcr.io/hawky4s/{{ .ProjectName }}:latest"
+    image_templates:
+      - "ghcr.io/hawky4s/{{ .ProjectName }}:latest-amd64"
+      - "ghcr.io/hawky4s/{{ .ProjectName }}:latest-arm64"

@@ -1,0 +1,16 @@
+apiVersion: v2
+name: opencost-cloudcost-exporter
+description: Prometheus exporter for AWS cloud costs from OpenCost
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - prometheus
+  - exporter
+  - opencost
+  - aws
+  - cost
+maintainers:
+  - name: hawky-4s-
+sources:
+  - https://github.com/hawky-4s-/opencost-cloudcost-exporter

@@ -1,0 +1,12 @@
+# Goreleaser Dockerfile - uses pre-built binary
+FROM gcr.io/distroless/static-debian12:nonroot
+
+COPY opencost-cloudcost-exporter /opencost-cloudcost-exporter
+
+# Expose metrics port
+EXPOSE 9100
+
+# Run as non-root user (distroless nonroot user)
+USER nonroot:nonroot
+
+ENTRYPOINT ["/opencost-cloudcost-exporter"]

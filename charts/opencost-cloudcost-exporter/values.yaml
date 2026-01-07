@@ -1,0 +1,60 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/hawky4s/opencost-cloudcost-exporter
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Labels to add to all resources
+commonLabels: {}
+
+# Annotations to add to pods
+podAnnotations: {}
+  # prometheus.io/scrape: "true"
+  # prometheus.io/port: "9100"
+
+opencost:
+  url: "http://opencost.opencost:9003"
+  window: "2d"
+
+cache:
+  ttl: "1h"
+  maxStale: "6h"
+
+# Enable emission of aws_cloud_cost_kubernetes_percent metric
+emitKubePercentMetrics: false
+
+# Comma-separated target currency symbols for exchange rates (empty to disable)
+currencySymbols: "CNY,EUR"
+
+service:
+  type: ClusterIP
+  port: 9100
+
+serviceMonitor:
+  enabled: false
+  interval: 1h
+  scrapeTimeout: 30s
+
+prometheusRule:
+  enabled: false
+  rules:
+    dailySpendThreshold: 5000
+    spikePercent: 20
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

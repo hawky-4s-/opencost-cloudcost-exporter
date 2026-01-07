@@ -1,0 +1,145 @@
+{{- if .Values.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "opencost-cloudcost-exporter.fullname" . }}
+  labels:
+    {{- include "opencost-cloudcost-exporter.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: cloudcost.rules
+      rules:
+        # ==========================================
+        # Single dimension aggregations
+        # ==========================================
+        
+        # Costs by owner
+        - record: aws_cloud_cost:by_owner:daily
+          expr: sum by (owner) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Costs by service
+        - record: aws_cloud_cost:by_service:daily
+          expr: sum by (service) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Costs by region
+        - record: aws_cloud_cost:by_region:daily
+          expr: sum by (region) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Costs by environment
+        - record: aws_cloud_cost:by_environment:daily
+          expr: sum by (environment) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Costs by category
+        - record: aws_cloud_cost:by_category:daily
+          expr: sum by (category) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Costs by cluster
+        - record: aws_cloud_cost:by_cluster:daily
+          expr: sum by (cluster) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Costs by account
+        - record: aws_cloud_cost:by_account:daily
+          expr: sum by (account_id) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Total cost
+        - record: aws_cloud_cost:total:daily
+          expr: sum(aws_cloud_cost_total{cost_type="amortized_net"})
+
+        # ==========================================
+        # Multi-dimension aggregations for drill-down
+        # ==========================================
+        
+        # Costs by owner and service
+        - record: aws_cloud_cost:by_owner_service:daily
+          expr: sum by (owner, service) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Costs by owner and region
+        - record: aws_cloud_cost:by_owner_region:daily
+          expr: sum by (owner, region) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Costs by owner and environment
+        - record: aws_cloud_cost:by_owner_environment:daily
+          expr: sum by (owner, environment) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Costs by service and region
+        - record: aws_cloud_cost:by_service_region:daily
+          expr: sum by (service, region) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Costs by service and category
+        - record: aws_cloud_cost:by_service_category:daily
+          expr: sum by (service, category) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Costs by account and service
+        - record: aws_cloud_cost:by_account_service:daily
+          expr: sum by (account_id, service) (aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Costs by account and region
+        - record: aws_cloud_cost:by_account_region:daily
+          expr: sum by (account_id, region) (aws_cloud_cost_total{cost_type="amortized_net"})
+
+        # ==========================================
+        # List cost (on-demand pricing without reservations/discounts)
+        # ==========================================
+        
+        # List costs by owner
+        - record: aws_cloud_cost_list:by_owner:daily
+          expr: sum by (owner,cost_type) (aws_cloud_cost_total)
+        
+        # List costs by service
+        - record: aws_cloud_cost_list:by_service:daily
+          expr: sum by (service,cost_type) (aws_cloud_cost_total)
+        
+        # List costs by region
+        - record: aws_cloud_cost_list:by_region:daily
+          expr: sum by (region,cost_type) (aws_cloud_cost_total)
+        
+        # List costs by environment
+        - record: aws_cloud_cost_list:by_environment:daily
+          expr: sum by (environment,cost_type) (aws_cloud_cost_total)
+        
+        # List costs by account
+        - record: aws_cloud_cost_list:by_account:daily
+          expr: sum by (account_id,cost_type) (aws_cloud_cost_total)
+        
+        # Total list cost
+        - record: aws_cloud_cost_list:total:daily
+          expr: sum(aws_cloud_cost_total{cost_type="list"})
+        
+        # Savings from reservations/discounts (list - amortized_net)
+        - record: aws_cloud_cost:savings:daily
+          expr: sum(aws_cloud_cost_total{cost_type="list"}) - sum(aws_cloud_cost_total{cost_type="amortized_net"})
+        
+        # Savings percentage
+        - record: aws_cloud_cost:savings_percent:daily
+          expr: (sum(aws_cloud_cost_total{cost_type="list"}) - sum(aws_cloud_cost_total{cost_type="amortized_net"})) / sum(aws_cloud_cost_total{cost_type="list"}) * 100
+
+    - name: cloudcost.alerts
+      rules:
+        # Daily spend threshold
+        - alert: CloudCostDailySpendHigh
+          expr: aws_cloud_cost:total:daily > {{ .Values.prometheusRule.rules.dailySpendThreshold }}
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Daily AWS spend exceeds ${{ .Values.prometheusRule.rules.dailySpendThreshold }}"
+
+        # Cost spike detection
+        - alert: CloudCostSpike
+          expr: |
+            aws_cloud_cost:total:daily / aws_cloud_cost:total:daily offset 1d > {{ div (add 100 .Values.prometheusRule.rules.spikePercent) 100 }}
+          for: 2h
+          labels:
+            severity: warning
+          annotations:
+            summary: "AWS costs increased by {{ .Values.prometheusRule.rules.spikePercent }}%+ day-over-day"
+
+        # Exporter health
+        - alert: CloudCostExporterDown
+          expr: up{job="{{ include "opencost-cloudcost-exporter.fullname" . }}"} == 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: "CloudCost Exporter is down"
+{{- end }}

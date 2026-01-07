@@ -1,0 +1,82 @@
+{
+  "code": 200,
+  "data": {
+    "sets": [
+      {
+        "cloudCosts": {
+          "453316427866/883112916672/AWS/AmazonEC2/Compute": {
+            "properties": {
+              "providerID": "i-0abc123def456",
+              "provider": "AWS",
+              "accountID": "883112916672",
+              "accountName": "883112916672",
+              "invoiceEntityID": "453316427866",
+              "invoiceEntityName": "453316427866",
+              "availabilityZone": "eu-west-1a",
+              "service": "AmazonEC2",
+              "category": "Compute",
+              "labels": {
+                "owner": "team-alpha",
+                "environment": "prod",
+                "cluster": "eks-main"
+              }
+            },
+            "window": {
+              "start": "2026-01-06T00:00:00Z",
+              "end": "2026-01-07T00:00:00Z"
+            },
+            "listCost": {"cost": 1500.50, "kubernetesPercent": 0.85},
+            "netCost": {"cost": 1200.40, "kubernetesPercent": 0.85},
+            "amortizedNetCost": {"cost": 1050.30, "kubernetesPercent": 0.85},
+            "invoicedCost": {"cost": 1200.40, "kubernetesPercent": 0.85},
+            "amortizedCost": {"cost": 1350.45, "kubernetesPercent": 0.85}
+          },
+          "453316427866/883112916672/AWS/AmazonRDS/Storage": {
+            "properties": {
+              "providerID": "db-instance-1",
+              "provider": "AWS",
+              "accountID": "883112916672",
+              "accountName": "883112916672",
+              "invoiceEntityID": "453316427866",
+              "invoiceEntityName": "453316427866",
+              "availabilityZone": "eu-west-1b",
+              "service": "AmazonRDS",
+              "category": "Storage",
+              "labels": {
+                "owner": "team-beta",
+                "environment": "staging"
+              }
+            },
+            "window": {
+              "start": "2026-01-06T00:00:00Z",
+              "end": "2026-01-07T00:00:00Z"
+            },
+            "listCost": {"cost": 500.00, "kubernetesPercent": 0},
+            "netCost": {"cost": 400.00, "kubernetesPercent": 0},
+            "amortizedNetCost": {"cost": 350.00, "kubernetesPercent": 0},
+            "invoicedCost": {"cost": 400.00, "kubernetesPercent": 0},
+            "amortizedCost": {"cost": 450.00, "kubernetesPercent": 0}
+          },
+          "453316427866/883112916672/AWS/AmazonElastiCache/Compute": {
+            "properties": {
+              "providerID": "elasticache-cluster-1",
+              "provider": "AWS",
+              "accountID": "883112916672",
+              "service": "AmazonElastiCache",
+              "category": "Compute"
+            },
+            "window": {
+              "start": "2026-01-06T00:00:00Z",
+              "end": "2026-01-07T00:00:00Z"
+            },
+            "listCost": {"cost": 200.00, "kubernetesPercent": 0},
+            "netCost": {"cost": 160.00, "kubernetesPercent": 0},
+            "amortizedNetCost": {"cost": 140.00, "kubernetesPercent": 0},
+            "invoicedCost": {"cost": 160.00, "kubernetesPercent": 0},
+            "amortizedCost": {"cost": 180.00, "kubernetesPercent": 0}
+          }
+        }
+      }
+    ]
+  }
+}

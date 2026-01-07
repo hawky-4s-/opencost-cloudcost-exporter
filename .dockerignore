@@ -1,0 +1,23 @@
+# Ignore binaries
+cloudcost-exporter
+*.exe
+
+# Ignore test artifacts
+coverage.out
+
+# Ignore IDE files
+.idea/
+.vscode/
+*.swp
+
+# Ignore git
+.git/
+.gitignore
+
+# Ignore docs for smaller image
+docs/
+*.md
+!README.md
+
+# Ignore test files
+*_test.go
