@@ -2,6 +2,9 @@
 
 A Prometheus exporter that bridges [OpenCost](https://www.opencost.io/) cloud cost data with your observability stack. It scrapes AWS cloud costs from OpenCost's `/cloudCost` API and exposes them as Prometheus metrics, enabling cost monitoring, alerting, and visualization in Grafana.
 
+> [!NOTE]
+> Currently only **AWS** cloud provider is supported. GCP and Azure support may be added in future releases.
+
 ## Key Features
 
 - **Multi-dimensional cost metrics** — Break down costs by account, service, region, environment, owner, and cluster
@@ -25,22 +28,54 @@ flowchart LR
 
 ## Prerequisites
 
-- **OpenCost** must be installed and accessible. See [OpenCost documentation](https://www.opencost.io/docs/installation/install) for installation instructions.
-- AWS Cloud Cost integration must be configured in OpenCost
+> [!IMPORTANT]
+> **OpenCost must be installed and running** before using this exporter. The exporter fetches cloud cost data from OpenCost's `/cloudCost` API endpoint.
 
-## Quick Start
+1. **Install OpenCost** — Follow the [OpenCost installation guide](https://www.opencost.io/docs/installation/install)
+2. **Enable AWS Cloud Cost integration** — Configure OpenCost to collect AWS cloud costs via the Cost and Usage Report (CUR)
+3. **Verify OpenCost is accessible** — The exporter needs network access to OpenCost's API (default: `http://opencost.opencost:9003`)
+
+## Installation
+
+### Using Helm (Recommended)
 
 ```bash
-# Run locally
-./opencost-cloudcost-exporter --opencost-url=http://localhost:9003
-
-# With Docker
-docker run -p 9100:9100 opencost-cloudcost-exporter:latest \
-  --opencost-url=http://opencost:9003
-
-# With Helm
+# Add the Helm repository (if published) or use local chart
 helm install opencost-cloudcost-exporter ./charts/opencost-cloudcost-exporter \
+  --namespace opencost \
   --set opencost.url=http://opencost.opencost:9003
+
+# With custom values
+helm install opencost-cloudcost-exporter ./charts/opencost-cloudcost-exporter \
+  --namespace opencost \
+  -f my-values.yaml
+```
+
+### Using Docker
+
+```bash
+docker run -p 9100:9100 ghcr.io/hawky4s/opencost-cloudcost-exporter:latest \
+  --opencost-url=http://opencost:9003
+```
+
+### Binary
+
+```bash
+# Download from releases or build locally
+./opencost-cloudcost-exporter --opencost-url=http://localhost:9003
+```
+
+## Verifying the Installation
+
+```bash
+# Check metrics endpoint
+curl http://localhost:9100/metrics | grep aws_cloud_cost
+
+# Check health
+curl http://localhost:9100/healthz
+
+# Check readiness
+curl http://localhost:9100/readyz
 ```
 
 ## Configuration
